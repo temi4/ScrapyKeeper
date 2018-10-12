@@ -162,6 +162,7 @@ class JobExecution(Base):
     running_on = db.Column(db.Text)
 
     raw_stats = db.Column(db.Text)
+    requests_count = db.Column(db.Integer)
     items_count = db.Column(db.Integer)
     warnings_count = db.Column(db.Integer)
     errors_count = db.Column(db.Integer)
@@ -172,6 +173,7 @@ class JobExecution(Base):
         datetime_regex = '(datetime\.datetime\([^)]+\))'
         self.raw_stats = re.sub(datetime_regex, r"'\1'", self.raw_stats)
         stats = demjson.decode(self.raw_stats)
+        self.requests_count = stats.get('downloader/request_count') or 0
         self.items_count = stats.get('item_scraped_count') or 0
         self.warnings_count = stats.get('log_count/WARNING') or 0
         self.errors_count = stats.get('log_count/ERROR') or 0
@@ -195,6 +197,7 @@ class JobExecution(Base):
             'job_instance': job_instance.to_dict() if job_instance else {},
             'has_warnings': self.has_warnings(),
             'has_errors': self.has_errors(),
+            'requests_count': self.requests_count if self.requests_count is not None else '-',
             'items_count': self.items_count if self.items_count is not None else '-',
             'warnings_count': self.warnings_count if self.warnings_count is not None else '-',
             'errors_count': self.errors_count if self.errors_count is not None else '-'

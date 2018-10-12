@@ -153,6 +153,7 @@
                 <th style="width: 20px">Priority</th>
                 <th style="width: 40px">Runtime</th>
                 <th style="width: 120px">Started</th>
+                <th style="width: 10px">Requests</th>
                 <th style="width: 10px">Items</th>
                 <th style="width: 10px">Warnings</th>
                 <th style="width: 10px">Errors</th>
@@ -187,6 +188,7 @@
                 {% endif %}
                 <td>{{ timedelta(job.end_time,job.start_time) }}</td>
                 <td>{{ job.start_time }}</td>
+                <td>{{ job.requests_count }}</td>
                 <td>{{ job.items_count }}</td>
                 <td>{{ job.warnings_count }}</td>
                 <td>{{ job.errors_count }}</td>
