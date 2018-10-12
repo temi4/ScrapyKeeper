@@ -250,3 +250,37 @@ class JobExecution(Base):
             hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
             result[hour_key] += 1
         return [dict(key=hour_key, value=result[hour_key]) for hour_key in hour_keys]
+
+    @classmethod
+    def list_request_stats_by_hours(cls, project_id):
+        result = {}
+        hour_keys = []
+        last_time = datetime.datetime.now() - datetime.timedelta(hours=23)
+        last_time = datetime.datetime(last_time.year, last_time.month, last_time.day, last_time.hour)
+        for hour in range(23, -1, -1):
+            time_tmp = datetime.datetime.now() - datetime.timedelta(hours=hour)
+            hour_key = time_tmp.strftime('%Y-%m-%d %H:00:00')
+            hour_keys.append(hour_key)
+            result[hour_key] = 0  # init
+        for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
+                                                       JobExecution.date_created >= last_time).all():
+            hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
+            result[hour_key] += job_execution.requests_count
+        return [dict(key=hour_key, value=result[hour_key]) for hour_key in hour_keys]
+
+    @classmethod
+    def list_item_stats_by_hours(cls, project_id):
+        result = {}
+        hour_keys = []
+        last_time = datetime.datetime.now() - datetime.timedelta(hours=23)
+        last_time = datetime.datetime(last_time.year, last_time.month, last_time.day, last_time.hour)
+        for hour in range(23, -1, -1):
+            time_tmp = datetime.datetime.now() - datetime.timedelta(hours=hour)
+            hour_key = time_tmp.strftime('%Y-%m-%d %H:00:00')
+            hour_keys.append(hour_key)
+            result[hour_key] = 0  # init
+        for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
+                                                       JobExecution.date_created >= last_time).all():
+            hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
+            result[hour_key] += job_execution.items_count
+        return [dict(key=hour_key, value=result[hour_key]) for hour_key in hour_keys]

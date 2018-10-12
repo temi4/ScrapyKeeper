@@ -656,11 +656,15 @@ def spider_egg_upload(project_id):
 def project_stats(project_id):
     project = Project.find_project_by_id(project_id)
     run_stats = JobExecution.list_run_stats_by_hours(project_id)
-    return render_template("project_stats.html", run_stats=run_stats)
+    request_stats = JobExecution.list_request_stats_by_hours(project_id)
+    item_stats = JobExecution.list_item_stats_by_hours(project_id)
+    return render_template("project_stats.html", run_stats=run_stats, request_stats=request_stats, item_stats=item_stats)
 
 
 @app.route("/project/<project_id>/server/stats")
 def service_stats(project_id):
     project = Project.find_project_by_id(project_id)
     run_stats = JobExecution.list_run_stats_by_hours(project_id)
-    return render_template("server_stats.html", run_stats=run_stats)
+    request_stats = JobExecution.list_request_stats_by_hours(project_id)
+    item_stats = JobExecution.list_item_stats_by_hours(project_id)
+    return render_template("server_stats.html", run_stats=run_stats, request_stats=request_stats, item_stats=item_stats)
