@@ -97,8 +97,12 @@
                     <span>Deploy</span></a></li>
                 <!--<li><a href="#"><i class="fa fa-circle-o text-red"></i> <span>Settings</span></a></li>-->
                 <li class="header">PROJECT</li>
-                <li><a href="/project/{{ project.id }}/project/stats"><i class="fa  fa-area-chart text-gray"></i> <span>Running Stats</span></a>
+                <li><a href="/project/{{ project.id }}/project/stats"><i class="fa  fa-area-chart text-gray"></i> <span>Project Stats</span></a>
                 </li>
+                {% for spider in spider_list %}
+                    <li><a href="/project/{{ project.id }}/{{ spider.spider_instance_id }}/stats"><i class="fa fa-align-left text-yellow"></i>Spider <span>{{ spider.spider_name }}</span></a>
+                    </li>
+                {% endfor %}
                 <!--<li><a href="#"><i class="fa fa-circle-o text-red"></i> <span>Members</span></a></li>-->
                 <li><a href="/project/manage"><i class="fa fa-gears text-red"></i> <span>Manage</span></a></li>
                 <li class="header">SERVER</li>

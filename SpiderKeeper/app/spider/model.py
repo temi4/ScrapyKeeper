@@ -162,10 +162,10 @@ class JobExecution(Base):
     running_on = db.Column(db.Text)
 
     raw_stats = db.Column(db.Text)
-    requests_count = db.Column(db.Integer)
-    items_count = db.Column(db.Integer)
-    warnings_count = db.Column(db.Integer)
-    errors_count = db.Column(db.Integer)
+    requests_count = db.Column(db.Integer, default=0)
+    items_count = db.Column(db.Integer, default=0)
+    warnings_count = db.Column(db.Integer, default=0)
+    errors_count = db.Column(db.Integer, default=0)
     RAW_STATS_REGEX = '\[scrapy\.statscollectors\][^{]+({[^}]+})'
     def process_raw_stats(self):
         if self.raw_stats is None:
@@ -197,10 +197,10 @@ class JobExecution(Base):
             'job_instance': job_instance.to_dict() if job_instance else {},
             'has_warnings': self.has_warnings(),
             'has_errors': self.has_errors(),
-            'requests_count': self.requests_count if self.requests_count is not None else '-',
-            'items_count': self.items_count if self.items_count is not None else '-',
-            'warnings_count': self.warnings_count if self.warnings_count is not None else '-',
-            'errors_count': self.errors_count if self.errors_count is not None else '-'
+            'requests_count': self.requests_count if self.requests_count is not None else 0,
+            'items_count': self.items_count if self.items_count is not None else 0,
+            'warnings_count': self.warnings_count if self.warnings_count is not None else 0,
+            'errors_count': self.errors_count if self.errors_count is not None else 0
         }
 
     @classmethod
@@ -235,7 +235,7 @@ class JobExecution(Base):
         return result
 
     @classmethod
-    def list_run_stats_by_hours(cls, project_id):
+    def list_run_stats_by_hours(cls, project_id, spider_id):
         result = {}
         hour_keys = []
         last_time = datetime.datetime.now() - datetime.timedelta(hours=23)
@@ -245,14 +245,21 @@ class JobExecution(Base):
             hour_key = time_tmp.strftime('%Y-%m-%d %H:00:00')
             hour_keys.append(hour_key)
             result[hour_key] = 0  # init
-        for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
+        if spider_id == "project" :
+            for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
                                                        JobExecution.date_created >= last_time).all():
-            hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
-            result[hour_key] += 1
+                hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
+                result[hour_key] += 1
+        else :
+            for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
+                                                       JobExecution.job_instance_id == spider_id,
+                                                       JobExecution.date_created >= last_time).all():
+                hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
+                result[hour_key] += 1
         return [dict(key=hour_key, value=result[hour_key]) for hour_key in hour_keys]
 
     @classmethod
-    def list_request_stats_by_hours(cls, project_id):
+    def list_request_stats_by_hours(cls, project_id, spider_id):
         result = {}
         hour_keys = []
         last_time = datetime.datetime.now() - datetime.timedelta(hours=23)
@@ -262,14 +269,21 @@ class JobExecution(Base):
             hour_key = time_tmp.strftime('%Y-%m-%d %H:00:00')
             hour_keys.append(hour_key)
             result[hour_key] = 0  # init
-        for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
+        if spider_id == "project" :
+            for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
                                                        JobExecution.date_created >= last_time).all():
-            hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
-            result[hour_key] += job_execution.requests_count
+                hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
+                result[hour_key] += job_execution.requests_count
+        else :
+            for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
+                                                       JobExecution.job_instance_id == spider_id,
+                                                       JobExecution.date_created >= last_time).all():
+                hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
+                result[hour_key] += job_execution.requests_count
         return [dict(key=hour_key, value=result[hour_key]) for hour_key in hour_keys]
 
     @classmethod
-    def list_item_stats_by_hours(cls, project_id):
+    def list_item_stats_by_hours(cls, project_id, spider_id):
         result = {}
         hour_keys = []
         last_time = datetime.datetime.now() - datetime.timedelta(hours=23)
@@ -279,8 +293,15 @@ class JobExecution(Base):
             hour_key = time_tmp.strftime('%Y-%m-%d %H:00:00')
             hour_keys.append(hour_key)
             result[hour_key] = 0  # init
-        for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
+        if spider_id == "project" :
+            for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
                                                        JobExecution.date_created >= last_time).all():
-            hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
-            result[hour_key] += job_execution.items_count
+                hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
+                result[hour_key] += job_execution.items_count
+        else :
+            for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
+                                                       JobExecution.job_instance_id == spider_id,
+                                                       JobExecution.date_created >= last_time).all():
+                hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
+                result[hour_key] += job_execution.items_count
         return [dict(key=hour_key, value=result[hour_key]) for hour_key in hour_keys]
