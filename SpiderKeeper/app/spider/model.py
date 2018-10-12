@@ -166,6 +166,9 @@ class JobExecution(Base):
     items_count = db.Column(db.Integer, default=0)
     warnings_count = db.Column(db.Integer, default=0)
     errors_count = db.Column(db.Integer, default=0)
+    bytes_count = db.Column(db.Integer, default=0)
+    retries_count = db.Column(db.Integer, default=0)
+    exceptions_count = db.Column(db.Integer, default=0)
     RAW_STATS_REGEX = '\[scrapy\.statscollectors\][^{]+({[^}]+})'
     def process_raw_stats(self):
         if self.raw_stats is None:
@@ -177,6 +180,9 @@ class JobExecution(Base):
         self.items_count = stats.get('item_scraped_count') or 0
         self.warnings_count = stats.get('log_count/WARNING') or 0
         self.errors_count = stats.get('log_count/ERROR') or 0
+        self.bytes_count = stats.get('downloader/response_bytes') or 0
+        self.retries_count = stats.get('retry/count') or 0
+        self.exceptions_count = stats.get('downloader/exception_count') or 0
     def has_warnings(self):
         return not self.raw_stats or not self.items_count or self.warnings_count
     def has_errors(self):
@@ -200,7 +206,10 @@ class JobExecution(Base):
             'requests_count': self.requests_count if self.requests_count is not None else 0,
             'items_count': self.items_count if self.items_count is not None else 0,
             'warnings_count': self.warnings_count if self.warnings_count is not None else 0,
-            'errors_count': self.errors_count if self.errors_count is not None else 0
+            'errors_count': self.errors_count if self.errors_count is not None else 0,
+            'bytes_count': self.bytes_count if self.bytes_count is not None else 0,
+            'retries_count': self.retries_count if self.retries_count is not None else 0,
+            'exceptions_count': self.exceptions_count if self.exceptions_count is not None else 0
         }
 
     @classmethod

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block content_header %}
+<h1>{{ title }} Stats</h1>
+{% endblock %}
+{% block content_body %}
+<div class="box">
+    <div class="box-header">
+        <h3 class="box-title">Spider Running (last 24 hours)</h3>
+    </div>
+    <div class="box-body">
+        <div class="chart">
+            <canvas id="run-stats-chart" style="height:230px"></canvas>
+        </div>
+    </div>
+    <div class="box-footer">
+
+    </div>
+</div>
+<div class="box">
+    <div class="box-header">
+        <h3 class="box-title">Performed Requests (last 24 hours)</h3>
+    </div>
+    <div class="box-body">
+        <div class="chart">
+            <canvas id="request-stats-chart" style="height:230px"></canvas>
+        </div>
+    </div>
+    <div class="box-footer">
+
+    </div>
+</div>
+<div class="box">
+    <div class="box-header">
+        <h3 class="box-title">Collected Items (last 24 hours)</h3>
+    </div>
+    <div class="box-body">
+        <div class="chart">
+            <canvas id="item-stats-chart" style="height:230px"></canvas>
+        </div>
+    </div>
+    <div class="box-footer">
+
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script src="/static/js/Chart.min.js"></script>
+<script>
+    //-------------
+    //- BAR CHART -
+    //-------------
+    var runStatsData = {
+        labels: [{% for item in run_stats %} '{{ item.key }}', {% endfor %}],
+        datasets: [
+            {
+                label: "Electronics",
+                fillColor: "rgba(210, 214, 222, 1)",
+                strokeColor: "rgba(210, 214, 222, 1)",
+                pointColor: "rgba(210, 214, 222, 1)",
+                pointStrokeColor: "#c1c7d1",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)",
+                data: [{% for item in run_stats %} {{ item.value }}, {% endfor %}]
+            }
+        ]
+    };
+    var runStatsChartCanvas = $("#run-stats-chart").get(0).getContext("2d");
+    var runStatsChart = new Chart(runStatsChartCanvas);
+    var runStatsChartData = runStatsData;
+
+
+    //-------------
+    //- BAR CHART -
+    //-------------
+    var requestStatsData = {
+        labels: [{% for item in request_stats %} '{{ item.key }}', {% endfor %}],
+        datasets: [
+            {
+                label: "Electronics",
+                fillColor: "rgba(210, 214, 222, 1)",
+                strokeColor: "rgba(210, 214, 222, 1)",
+                pointColor: "rgba(210, 214, 222, 1)",
+                pointStrokeColor: "#c1c7d1",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)",
+                data: [{% for item in request_stats %} {{ item.value }}, {% endfor %}]
+            }
+        ]
+    };
+    var requestStatsChartCanvas = $("#request-stats-chart").get(0).getContext("2d");
+    var requestStatsChart = new Chart(requestStatsChartCanvas);
+    var requestStatsChartData = requestStatsData;
+
+
+    //-------------
+    //- BAR CHART -
+    //-------------
+    var itemStatsData = {
+        labels: [{% for item in item_stats %} '{{ item.key }}', {% endfor %}],
+        datasets: [
+            {
+                label: "Electronics",
+                fillColor: "rgba(210, 214, 222, 1)",
+                strokeColor: "rgba(210, 214, 222, 1)",
+                pointColor: "rgba(210, 214, 222, 1)",
+                pointStrokeColor: "#c1c7d1",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)",
+                data: [{% for item in item_stats %} {{ item.value }}, {% endfor %}]
+            }
+        ]
+    };
+    var itemStatsChartCanvas = $("#item-stats-chart").get(0).getContext("2d");
+    var itemStatsChart = new Chart(itemStatsChartCanvas);
+    var itemStatsChartData = itemStatsData;
+
+
+    var statsChartOptions = {
+        //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
+        scaleBeginAtZero: true,
+        //Boolean - Whether grid lines are shown across the chart
+        scaleShowGridLines: true,
+        //String - Colour of the grid lines
+        scaleGridLineColor: "rgba(0,0,0,.05)",
+        //Number - Width of the grid lines
+        scaleGridLineWidth: 1,
+        //Boolean - Whether to show horizontal lines (except X axis)
+        scaleShowHorizontalLines: true,
+        //Boolean - Whether to show vertical lines (except Y axis)
+        scaleShowVerticalLines: true,
+        //Boolean - If there is a stroke on each bar
+        barShowStroke: true,
+        //Number - Pixel width of the bar stroke
+        barStrokeWidth: 2,
+        //Number - Spacing between each of the X value sets
+        barValueSpacing: 5,
+        //Number - Spacing between data sets within X values
+        barDatasetSpacing: 1,
+        //Boolean - whether to make the chart responsive
+        responsive: true,
+        maintainAspectRatio: true
+    };
+
+    statsChartOptions.datasetFill = true;
+    
+    // load chart option into each component
+    runStatsChart.Line(runStatsChartData, statsChartOptions);
+    requestStatsChart.Line(requestStatsChartData, statsChartOptions);
+    itemStatsChart.Line(itemStatsChartData, statsChartOptions);
+</script>
+{% endblock %}

@@ -654,19 +654,21 @@ def spider_egg_upload(project_id):
 
 @app.route("/project/<project_id>/<spider_id>/stats")
 def project_stats(project_id, spider_id):
-    if spider_id != "server":
+    if spider_id == "project":
         project = Project.find_project_by_id(project_id)
         run_stats = JobExecution.list_run_stats_by_hours(project_id, spider_id)
         request_stats = JobExecution.list_request_stats_by_hours(project_id, spider_id)
         item_stats = JobExecution.list_item_stats_by_hours(project_id, spider_id)
-        if spider_id != "project":
-            title = "Spider " + SpiderInstance.query.filter_by(project_id=project_id, id=spider_id).first().spider_name
-        else :
-            title = "Project " + project.project_name
+        title = "Project " + project.project_name
         return render_template("project_stats.html", run_stats=run_stats, request_stats=request_stats, item_stats=item_stats, title=title)
+    elif spider_id == "server":
+        project = Project.find_project_by_id(project_id)
+        run_stats = JobExecution.list_run_stats_by_hours(project_id, spider_id)
+        return render_template("server_stats.html", run_stats=run_stats)
     else :
         project = Project.find_project_by_id(project_id)
-        run_stats = JobExecution.list_run_stats_by_hours(project_id)
-        request_stats = JobExecution.list_request_stats_by_hours(project_id)
-        item_stats = JobExecution.list_item_stats_by_hours(project_id)
-        return render_template("server_stats.html", run_stats=run_stats, request_stats=request_stats, item_stats=item_stats)
+        run_stats = JobExecution.list_run_stats_by_hours(project_id, spider_id)
+        request_stats = JobExecution.list_request_stats_by_hours(project_id, spider_id)
+        item_stats = JobExecution.list_item_stats_by_hours(project_id, spider_id)
+        title = "Spider " + SpiderInstance.query.filter_by(project_id=project_id, id=spider_id).first().spider_name
+        return render_template("spider_stats.html", run_stats=run_stats, request_stats=request_stats, item_stats=item_stats, title=title)
