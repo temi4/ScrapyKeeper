@@ -169,6 +169,8 @@ class JobExecution(Base):
     bytes_count = db.Column(db.Integer, default=0)
     retries_count = db.Column(db.Integer, default=0)
     exceptions_count = db.Column(db.Integer, default=0)
+    cache_size_count = db.Column(db.Integer, default=0)
+    cache_object_count = db.Column(db.Integer, default=0)
     RAW_STATS_REGEX = '\[scrapy\.statscollectors\][^{]+({[^}]+})'
     def process_raw_stats(self):
         if self.raw_stats is None:
@@ -183,6 +185,8 @@ class JobExecution(Base):
         self.bytes_count = stats.get('downloader/response_bytes') or 0
         self.retries_count = stats.get('retry/count') or 0
         self.exceptions_count = stats.get('downloader/exception_count') or 0
+        self.cache_size_count = stats.get('cache/size/end') or 0
+        self.cache_object_count = stats.get('cache/object/keeped') or 0
     def has_warnings(self):
         return not self.raw_stats or not self.items_count or self.warnings_count
     def has_errors(self):
@@ -209,7 +213,9 @@ class JobExecution(Base):
             'errors_count': self.errors_count if self.errors_count is not None else 0,
             'bytes_count': self.bytes_count if self.bytes_count is not None else 0,
             'retries_count': self.retries_count if self.retries_count is not None else 0,
-            'exceptions_count': self.exceptions_count if self.exceptions_count is not None else 0
+            'exceptions_count': self.exceptions_count if self.exceptions_count is not None else 0,
+            'cache_size_count': self.cache_size_count if self.cache_size_count is not None else 0,
+            'cache_object_count': self.cache_object_count if self.cache_object_count is not None else 0
         }
 
     @classmethod
@@ -241,6 +247,19 @@ class JobExecution(Base):
                                    (JobExecution.running_status == SpiderStatus.FINISHED) | (
                                        JobExecution.running_status == SpiderStatus.CANCELED)).order_by(
                                    desc(JobExecution.date_modified)).limit(each_status_limit)]
+        return result
+
+    @classmethod
+    def list_spider_stats(cls, project_id, spider_id):
+        result = []
+        for spider in SpiderInstance.query.filter_by(project_id=project_id, id=spider_id).all():
+            spider_name = spider.spider_name
+        job_instances = []
+        for job_instance in JobInstance.query.filter_by(spider_name=spider_name).order_by(desc(JobInstance.id)).limit(10).all():
+            job_instances.append(job_instance.id)
+        for job_execution in JobExecution.query.filter(JobExecution.id.in_(job_instances)).order_by(desc(JobExecution.id)).all() :
+            result.append(job_execution.to_dict())
+        result.reverse()
         return result
 
     @classmethod

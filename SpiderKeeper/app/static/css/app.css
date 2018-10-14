@@ -11,3 +11,21 @@
     text-overflow: ellipsis;
     width: 100px;
 }
+
+canvas {
+    -moz-user-select: none;
+    webkit-user-select: none;
+    -ms-user-select: none;
+}
+.chart-container {
+    width: 100%;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+.scraped-items {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}

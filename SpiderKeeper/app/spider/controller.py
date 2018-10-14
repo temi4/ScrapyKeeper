@@ -667,8 +667,86 @@ def project_stats(project_id, spider_id):
         return render_template("server_stats.html", run_stats=run_stats)
     else :
         project = Project.find_project_by_id(project_id)
-        run_stats = JobExecution.list_run_stats_by_hours(project_id, spider_id)
-        request_stats = JobExecution.list_request_stats_by_hours(project_id, spider_id)
-        item_stats = JobExecution.list_item_stats_by_hours(project_id, spider_id)
-        title = "Spider " + SpiderInstance.query.filter_by(project_id=project_id, id=spider_id).first().spider_name
-        return render_template("spider_stats.html", run_stats=run_stats, request_stats=request_stats, item_stats=item_stats, title=title)
+        spider = SpiderInstance.query.filter_by(project_id=project_id, id=spider_id).first()
+        results = JobExecution.list_spider_stats(project_id, spider_id)
+        start_time = []
+        end_time = []
+        end_time_short = []
+        duration_time = []
+        requests_count = []
+        items_count = []
+        items_cached = []
+        warnings_count = []
+        errors_count = []
+        bytes_count = []
+        retries_count = []
+        exceptions_count = []
+        cache_size_count = []
+        cache_object_count = []
+        last_start_time = ""
+        last_items_count = ""
+        old_items_count = []
+        
+        # Display date trick for small charts
+        displayDates = False
+        displayedDates = []
+        for i in range(0,len(results)):
+            if (results[i]['end_time'] != "") and (results[i]['end_time'].split(" ")[0] not in displayedDates):
+                displayedDates.append(results[i]['end_time'].split(" ")[0])
+        if len(displayedDates) > 2 :
+            displayDates = True
+        
+        for i in range(0,len(results)):
+            if i == len(results) - 1:
+                last_start_time = results[i]['start_time']
+                last_items_count = results[i]['items_count']
+            else :
+                old_items_count.append(results[i]['items_count'])
+            start_time.append(results[i]['start_time'])
+            end_time.append(results[i]['end_time'])
+            duration_time.append((datetime.datetime.strptime(results[i]['end_time'], '%Y-%m-%d %H:%M:%S') - datetime.datetime.strptime(results[i]['start_time'], '%Y-%m-%d %H:%M:%S')).total_seconds())
+            if displayDates:
+                end_time_short.append(results[i]['end_time'].split(" ")[0])
+            else :
+                end_time_short.append(results[i]['end_time'].split(" ")[1])
+            requests_count.append(results[i]['requests_count'])
+            items_count.append(results[i]['items_count'])
+            if results[i]['items_count'] != 0:
+                items_cached.append(results[i]['items_count'] - results[i]['requests_count'])
+            else :
+                items_cached.append(0)
+            warnings_count.append(results[i]['warnings_count'])
+            errors_count.append(results[i]['errors_count'])
+            bytes_count.append(results[i]['bytes_count'])
+            retries_count.append(results[i]['retries_count'])
+            exceptions_count.append(results[i]['exceptions_count'])
+            cache_size_count.append(results[i]['cache_size_count'])
+            cache_object_count.append(results[i]['cache_object_count'])
+        
+        # tricks to have anive gauge...
+        if len(results) == 0:
+            min_items_count = 0
+            max_items_count = 100
+            average_items_count = 50
+        else :
+            items_not_null = []
+            for i in old_items_count :
+                if i != 0 :
+                    items_not_null.append(i)
+            if len(items_not_null) == 0 : items_not_null = [0]
+            min_items_count = min(items_not_null)
+            if len(old_items_count) == 0 : max_items_count = last_items_count
+            else : max_items_count = max(old_items_count)
+            average_items_count = sum(items_not_null) / len(items_not_null)
+            if (min_items_count / max_items_count) > 0.8 :
+                min_items_count = max_items_count * 0.8
+            if (average_items_count / max_items_count) > 0.95 or max_items_count == last_items_count:
+                max_items_count = last_items_count * 1.05
+        
+        return render_template("spider_stats.html", spider=spider, start_time=start_time, end_time=end_time, end_time_short=end_time_short, duration_time=duration_time,
+                    last_start_time=last_start_time, last_items_count=last_items_count, average_items_count=average_items_count,
+                    min_items_count=min_items_count, max_items_count=max_items_count, 
+                    requests_count=requests_count, items_count=items_count, items_cached=items_cached,
+                    warnings_count=warnings_count, errors_count=errors_count,
+                    bytes_count=bytes_count, retries_count=retries_count, exceptions_count=exceptions_count,
+                    cache_size_count=cache_size_count, cache_object_count=cache_object_count)
