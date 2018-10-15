@@ -2,7 +2,7 @@ import logging
 import os
 from optparse import OptionParser
 
-from SpiderKeeper.app import app, initialize
+from ScrapyKeeper.app import app, initialize
 
 
 def main():
@@ -18,14 +18,14 @@ def main():
     if opts.verbose:
         app.logger.setLevel(logging.DEBUG)
     initialize()
-    app.logger.info("SpiderKeeper startd on %s:%s username:%s/password:%s with %s servers:%s" % (
+    app.logger.info("ScrapyKeeper startd on %s:%s username:%s/password:%s with %s servers:%s" % (
         opts.host, opts.port, opts.username, opts.password, opts.server_type, ','.join(app.config.get('SERVERS', []))))
     app.run(host=opts.host, port=opts.port, use_reloader=False, threaded=True)
 
 
 def parse_opts(config):
     parser = OptionParser(usage="%prog [options]",
-                          description="Admin ui for spider service")
+                          description="Admin ui for scrapy spider service")
     parser.add_option("--host",
                       help="host, default:0.0.0.0",
                       dest='host',
@@ -53,7 +53,7 @@ def parse_opts(config):
                       action='append',
                       default=[])
     parser.add_option("--database-url",
-                      help='SpiderKeeper metadata database default: %s' % config.get('SQLALCHEMY_DATABASE_URI'),
+                      help='ScrapyKeeper metadata database default: %s' % config.get('SQLALCHEMY_DATABASE_URI'),
                       dest='database_url',
                       default=config.get('SQLALCHEMY_DATABASE_URI'))
 

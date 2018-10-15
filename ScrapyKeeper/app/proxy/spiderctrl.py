@@ -4,8 +4,8 @@ from functools import reduce
 import requests
 import re
 
-from SpiderKeeper.app import db
-from SpiderKeeper.app.spider.model import SpiderStatus, JobExecution, JobInstance, Project, JobPriority
+from ScrapyKeeper.app import db
+from ScrapyKeeper.app.spider.model import SpiderStatus, JobExecution, JobInstance, Project, JobPriority
 
 
 class SpiderServiceProxy(object):

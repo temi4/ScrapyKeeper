@@ -3,7 +3,7 @@ import demjson
 import numpy as np
 import re
 from sqlalchemy import desc
-from SpiderKeeper.app import db, Base
+from ScrapyKeeper.app import db, Base
 
 
 class Project(Base):

@@ -1,4 +1,9 @@
-# SpiderKeeper Changelog
+# ScrapyKeeper Changelog
+
+## 1.3.0 (2018-10-15)
+- fork from SpiderKeeper into ScrapyKeeper
+- additionnal statistics
+
 ## 1.2.0 (2017-07-24)
 - support chose server manually
 - support set cron exp manually

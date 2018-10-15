@@ -1,2 +1,2 @@
-recursive-include SpiderKeeper/app/templates *
-recursive-include SpiderKeeper/app/static *
+recursive-include ScrapyKeeper/app/templates *
+recursive-include ScrapyKeeper/app/static *
