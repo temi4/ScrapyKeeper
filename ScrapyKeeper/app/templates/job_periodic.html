@@ -68,19 +68,19 @@
                 {% if job_instance.enabled %}
                 <td>
                     <a href="/project/{{ project.id }}/job/{{ job_instance.job_instance_id }}/switch"><span
-                            class="label label-success">Enabled</span></a>
+                            class="label label-success">ENABLED</span></a>
                 </td>
                 {% else %}
                 <td>
                     <a href="/project/{{ project.id }}/job/{{ job_instance.job_instance_id }}/switch"><span
-                            class="label label-danger">Disabled</span></a>
+                            class="label label-danger">DISABLED</span></a>
                 </td>
                 {% endif %}
                 <td>
                     <a href="/project/{{ project.id }}/job/{{ job_instance.job_instance_id }}/run"><span
-                            class="label label-info">Run</span></a>
+                            class="label label-info">RUN</span></a>
                     <a href="/project/{{ project.id }}/job/{{ job_instance.job_instance_id }}/remove"><span
-                            class="label label-danger">Remove</span></a>
+                            class="label label-danger">REMOVE</span></a>
                 </td>
             </tr>
             {% endfor %}

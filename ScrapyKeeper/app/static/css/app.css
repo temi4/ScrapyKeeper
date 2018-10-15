@@ -29,3 +29,7 @@ canvas {
     flex-wrap: wrap;
     justify-content: center;
 }
+
+.label, .btn {
+    opacity: 0.75
+}

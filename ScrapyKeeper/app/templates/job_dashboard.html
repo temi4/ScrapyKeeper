@@ -158,7 +158,7 @@
                 <th style="width: 10px">Warnings</th>
                 <th style="width: 10px">Errors</th>
                 <th style="width: 10px">Log</th>
-                <th style="width: 10px">Status</th>
+                <th style="width: 10px">Status/Action</th>
             </tr>
             {% for job in job_status.COMPLETED %}
             {% if job.job_instance %}
@@ -195,15 +195,14 @@
                 <td><a href="/project/{{ project.id }}/jobexecs/{{ job.job_execution_id }}/log" target="_blank"
                        data-toggle="tooltip" data-placement="top" title="{{ job.service_job_execution_id }}">Log</a>
                 </td>
-                {% if job.running_status == 2 %}
-                    <td>
+                <td>
+                    {% if job.running_status == 2 %}
                         <span class="label label-success">FINISHED</span>
-                    </td>
-                {% else %}
-                    <td>
-                        <span class="label label-danger">CANCELED</span>
-                    </td>
-                {% endif %}
+                    {% else %}
+                        <span class="label label-warning">CANCELED</span>
+                    {% endif %}
+                    <a href="/project/{{ project.id }}/jobexecs/{{ job.job_execution_id }}/remove"><span class="label label-danger">REMOVE</span></a>
+                </td>
             </tr>
             {% endif %}
             {% endfor %}

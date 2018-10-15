@@ -595,6 +595,14 @@ def job_log(project_id, job_exec_id):
     return render_template("job_log.html", log_lines=raw.split('\n'))
 
 
+@app.route("/project/<project_id>/jobexecs/<job_exec_id>/remove")
+def job_exec_remove(project_id, job_exec_id):
+    job_execution = JobExecution.query.filter_by(project_id=project_id, id=job_exec_id).first()
+    db.session.delete(job_execution)
+    db.session.commit()
+    return redirect(request.referrer, code=302)
+
+
 @app.route("/project/<project_id>/job/<job_instance_id>/run")
 def job_run(project_id, job_instance_id):
     job_instance = JobInstance.query.filter_by(project_id=project_id, id=job_instance_id).first()
@@ -656,12 +664,13 @@ def spider_egg_upload(project_id):
 def project_stats(project_id, spider_id):
     if spider_id == "project":
         project = Project.find_project_by_id(project_id)
+        spider = SpiderInstance.query.filter_by(project_id=project_id).all()
         working_time = JobExecution.list_working_time(project_id)
         last_run = JobExecution.list_last_run(project_id)
         quality_review = JobExecution.list_quality_review(project_id)
         last_ee = JobExecution.list_last_ee(project_id)
         run_stats = JobExecution.list_run_stats_by_hours(project_id)
-        return render_template("project_stats.html", project=project, working_time=working_time, last_run=last_run, quality_review=quality_review, last_ee=last_ee, run_stats=run_stats)
+        return render_template("project_stats.html", project=project, spider=spider, working_time=working_time, last_run=last_run, quality_review=quality_review, last_ee=last_ee, run_stats=run_stats)
         
     elif spider_id == "server":
         project = Project.find_project_by_id(project_id)
@@ -726,7 +735,10 @@ def project_stats(project_id, spider_id):
             requests_count.append(results[i]['requests_count'])
             items_count.append(results[i]['items_count'])
             if results[i]['items_count'] != 0:
-                items_cached.append(results[i]['items_count'] - results[i]['requests_count'])
+                if results[i]['items_count'] - results[i]['requests_count'] >= 0:
+                    items_cached.append(results[i]['items_count'] - results[i]['requests_count'])
+                else :
+                    items_cached.append(0)
             else :
                 items_cached.append(0)
             warnings_count.append(results[i]['warnings_count'])

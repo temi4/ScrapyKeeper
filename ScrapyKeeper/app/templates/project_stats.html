@@ -50,6 +50,7 @@
                         <th style="width: 40px">Items</th>
                         <th style="width: 40px">Errors</th>
                         <th style="width: 40px">Exceptions</th>
+                        <th style="width: 40px">Action</th>
                     </tr>
                     {% for job in last_ee %}
                         <tr>
@@ -58,6 +59,7 @@
                             <td>{{ job.items_count }}</td>
                             <td>{{ job.errors_count }}</td>
                             <td>{{ job.exceptions_count }}</td>
+                            <td><a href="/project/{{ job.project_id }}/jobexecs/{{ job.job_execution_id }}/remove"><span class="label label-danger">REMOVE</span></a></td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -91,8 +93,8 @@
         return color;
     }
     
-    {% for item in working_time.keys() %}
-    var color{{ item }} = getRandomColor();
+    {% for item in spider %}
+    var color{{ item.spider_name }} = getRandomColor();
     {% endfor %}
     var color = Chart.helpers.color;
     
