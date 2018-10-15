@@ -40,3 +40,5 @@ NO_AUTH = False
 BASIC_AUTH_USERNAME = 'admin'
 BASIC_AUTH_PASSWORD = 'admin'
 BASIC_AUTH_FORCE = True
+
+NO_SENTRY = False

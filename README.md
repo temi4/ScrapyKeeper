@@ -46,5 +46,6 @@ Options:
   --database-url=DATABASE_URL
                         ScrapyKeeper metadata database default: sqlite://./ScrapyKeeper.db
   --no-auth             disable basic auth
+  --no-sentry           disable sentry.io error reporting
   -v, --verbose         log level
 ```

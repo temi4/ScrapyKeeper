@@ -13,7 +13,8 @@ def main():
         SQLALCHEMY_DATABASE_URI=opts.database_url,
         BASIC_AUTH_USERNAME=opts.username,
         BASIC_AUTH_PASSWORD=opts.password,
-        NO_AUTH=opts.no_auth
+        NO_AUTH=opts.no_auth,
+        NO_SENTRY=opts.no_sentry
     ))
     if opts.verbose:
         app.logger.setLevel(logging.DEBUG)
@@ -60,6 +61,10 @@ def parse_opts(config):
     parser.add_option("--no-auth",
                       help="disable basic auth",
                       dest='no_auth',
+                      action='store_true')
+    parser.add_option("--no-sentry",
+                      help="disable sentry.io error reporting",
+                      dest='no_sentry',
                       action='store_true')
     parser.add_option("-v", "--verbose",
                       help="log level",
