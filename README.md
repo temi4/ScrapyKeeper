@@ -8,11 +8,17 @@ A scalable admin ui for spider service
 
 ScrapyKeeeper is a fork of [SpiderKeeper](https://github.com/DormyMo/SpiderKeeper)
 
--## Screenshot
--![job dashboard](https://raw.githubusercontent.com/DormyMo/SpiderKeeper/master/screenshot/screenshot_1.png)
--![periodic job](https://raw.githubusercontent.com/DormyMo/SpiderKeeper/master/screenshot/screenshot_2.png)
--![project stats](https://raw.githubusercontent.com/DormyMo/SpiderKeeper/master/screenshot/screenshot_3.png)
--![spider stats](https://raw.githubusercontent.com/DormyMo/SpiderKeeper/master/screenshot/screenshot_4.png)
+Forked to provide:
+  - Enhanced statistics (Errors, Exceptions, Retries...)
+  - Cache support
+  - Dashboard
+  - Most of pending SpideKeeper ahead commits
+
+## Screenshot
+![job dashboard](https://raw.githubusercontent.com/fliot/ScrapyKeeper/master/screenshot/screenshot_1.png)
+![periodic job](https://raw.githubusercontent.com/fliot/ScrapyKeeper/master/screenshot/screenshot_2.png)
+![project stats](https://raw.githubusercontent.com/fliot/ScrapyKeeper/master/screenshot/screenshot_3.png)
+![spider stats](https://raw.githubusercontent.com/fliot/ScrapyKeeper/master/screenshot/screenshot_4.png)
 
 How to install ?
 ```sh
