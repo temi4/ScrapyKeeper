@@ -31,9 +31,9 @@
                      data-minor-ticks="2"
                      data-stroke-ticks="true"
                      data-highlights='[
-                        { "from": 0, "to": {{ min_items_count }}, "color": "rgba(200, 50, 50, .75)" },
-                        { "from": {{ min_items_count }}, "to": {{ max_items_count }}, "color": "rgba(100, 255, 100, .2)" },
-                        { "from": {{ max_items_count }}, "to": {{ max_items_count * 1.5 }}, "color": "rgba(220, 200, 0, .75)" }
+                        { "from": 0, "to": {{ min_items_count }}, "color": "rgb(255, 99, 132, 0.5)" },
+                        { "from": {{ min_items_count }}, "to": {{ max_items_count }}, "color": "rgba(100, 255, 100, 0.5)" },
+                        { "from": {{ max_items_count }}, "to": {{ max_items_count * 1.5 }}, "color": "rgb(255, 159, 64, 0.5)" }
                      ]'
                      data-color-plate="#fff"
                      data-border-shadow-width="0"
@@ -117,6 +117,8 @@
                     steppedLine: true,
                     data: data,
                     borderColor: details.color,
+                    backgroundColor: details.background,
+
                     fill: true,
                 }]
             },
@@ -136,19 +138,19 @@
         labels: [{% for item in end_time %} '{{ item }}', {% endfor %}],
         datasets: [{
             label: 'Requests',
-            backgroundColor: "rgb(255, 99, 132)",
+            backgroundColor: "rgb(255, 99, 132, 0.75)",
             stack: 'Stack 0',
             yAxisID: 'y-axis-1',
             data: [{% for item in requests_count %} '{{ item }}', {% endfor %}]
         }, {
             label: 'Cached Requests',
-            backgroundColor: "rgb(54, 162, 235)",
+            backgroundColor: "rgb(54, 162, 235, 0.75)",
             stack: 'Stack 0',
             yAxisID: 'y-axis-1',
             data: [{% for item in items_cached %} '{{ item }}', {% endfor %}]
         }, {
             label: 'Execution Time',
-            backgroundColor: "rgb(75, 192, 192)",
+            backgroundColor: "rgb(75, 192, 192, 0.75)",
             stack: 'Stack 1',
             yAxisID: 'y-axis-2',
             data: [{% for item in duration_time %} '{{ item }}', {% endfor %}]
@@ -158,10 +160,11 @@
             fill: false,
             steppedLine: 'before',
             label: 'Exception',
-            backgroundColor: "rgba(200, 50, 50, .75)",
-            pointRadius: [{% for item in exceptions_count %} '{{ item * 2 }}', {% endfor %}],
-            pointHoverRadius: [{% for item in exceptions_count %} '{{ item * 2 }}', {% endfor %}],
-            pointStyle: 'triangle',
+            borderColor: "rgb(0, 0, 0, 0)",
+            backgroundColor: "rgb(255, 205, 86, .75)",
+            pointRadius: [{% for item in exceptions_size %} '{{ item }}', {% endfor %}],
+            pointHoverRadius: [{% for item in exceptions_size %} '{{ item }}', {% endfor %}],
+            pointStyle: 'rectRot',
             yAxisID: 'y-axis-3',
             data: [{% for item in exceptions_count %} '{{ item }}', {% endfor %}]
         }]
@@ -219,7 +222,8 @@
         var data= [{% for item in items_count %} {{ item }}, {% endfor %}];
         var details = {
             steppedLine: true,
-            color: "rgb(255, 99, 132)"
+            color: "rgb(255, 205, 86)",
+            background: "rgb(255, 205, 86, .15)"
         };
         var div = document.createElement('div');
         div.classList.add('chart-container');
@@ -238,7 +242,8 @@
         var data= [{% for item in requests_count %} {{ item }}, {% endfor %}];
         var details = {
             steppedLine: true,
-            color: "rgb(255, 99, 132)"
+            color: "rgb(255, 99, 132)",
+            background: "rgb(255, 99, 132, 0.15)"
         };
         var div = document.createElement('div');
         div.classList.add('chart-container');

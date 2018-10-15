@@ -656,15 +656,20 @@ def spider_egg_upload(project_id):
 def project_stats(project_id, spider_id):
     if spider_id == "project":
         project = Project.find_project_by_id(project_id)
-        run_stats = JobExecution.list_run_stats_by_hours(project_id, spider_id)
-        request_stats = JobExecution.list_request_stats_by_hours(project_id, spider_id)
-        item_stats = JobExecution.list_item_stats_by_hours(project_id, spider_id)
-        title = "Project " + project.project_name
-        return render_template("project_stats.html", run_stats=run_stats, request_stats=request_stats, item_stats=item_stats, title=title)
+        working_time = JobExecution.list_working_time(project_id)
+        last_run = JobExecution.list_last_run(project_id)
+        quality_review = JobExecution.list_quality_review(project_id)
+        last_ee = JobExecution.list_last_ee(project_id)
+        run_stats = JobExecution.list_run_stats_by_hours(project_id)
+        return render_template("project_stats.html", project=project, working_time=working_time, last_run=last_run, quality_review=quality_review, last_ee=last_ee, run_stats=run_stats)
+        
     elif spider_id == "server":
         project = Project.find_project_by_id(project_id)
-        run_stats = JobExecution.list_run_stats_by_hours(project_id, spider_id)
+        run_stats = JobExecution.list_run_stats_by_hours(project_id)
+        request_stats = JobExecution.list_request_stats_by_hours(project_id, spider_id)
+        item_stats = JobExecution.list_item_stats_by_hours(project_id, spider_id)
         return render_template("server_stats.html", run_stats=run_stats)
+        
     else :
         project = Project.find_project_by_id(project_id)
         spider = SpiderInstance.query.filter_by(project_id=project_id, id=spider_id).first()
@@ -681,6 +686,7 @@ def project_stats(project_id, spider_id):
         bytes_count = []
         retries_count = []
         exceptions_count = []
+        exceptions_size = []
         cache_size_count = []
         cache_object_count = []
         last_start_time = ""
@@ -691,10 +697,14 @@ def project_stats(project_id, spider_id):
         displayDates = False
         displayedDates = []
         for i in range(0,len(results)):
-            if (results[i]['end_time'] != "") and (results[i]['end_time'].split(" ")[0] not in displayedDates):
+            if (results[i]['end_time'] != None ) and (results[i]['end_time'].split(" ")[0] not in displayedDates):
                 displayedDates.append(results[i]['end_time'].split(" ")[0])
         if len(displayedDates) > 2 :
             displayDates = True
+        
+        # remove last JobInstance if not started or not finished
+        if (results[-1]['start_time'] == None) or (results[-1]['end_time'] == None) :
+            results.pop()
         
         for i in range(0,len(results)):
             if i == len(results) - 1:
@@ -702,13 +712,16 @@ def project_stats(project_id, spider_id):
                 last_items_count = results[i]['items_count']
             else :
                 old_items_count.append(results[i]['items_count'])
+            
             start_time.append(results[i]['start_time'])
             end_time.append(results[i]['end_time'])
             duration_time.append((datetime.datetime.strptime(results[i]['end_time'], '%Y-%m-%d %H:%M:%S') - datetime.datetime.strptime(results[i]['start_time'], '%Y-%m-%d %H:%M:%S')).total_seconds())
+            
             if displayDates:
-                end_time_short.append(results[i]['end_time'].split(" ")[0])
+                end_time_short.append(end_time[-1].split(" ")[0])
             else :
-                end_time_short.append(results[i]['end_time'].split(" ")[1])
+                end_time_short.append(end_time[-1].split(" ")[1])
+            
             requests_count.append(results[i]['requests_count'])
             items_count.append(results[i]['items_count'])
             if results[i]['items_count'] != 0:
@@ -719,11 +732,17 @@ def project_stats(project_id, spider_id):
             errors_count.append(results[i]['errors_count'])
             bytes_count.append(results[i]['bytes_count'])
             retries_count.append(results[i]['retries_count'])
+            
             exceptions_count.append(results[i]['exceptions_count'])
+            if results[i]['exceptions_count'] > 10 :
+                exceptions_size.append(30)
+            else :
+                exceptions_size.append(results[i]['exceptions_count'] * 3)
+            
             cache_size_count.append(results[i]['cache_size_count'])
             cache_object_count.append(results[i]['cache_object_count'])
         
-        # tricks to have anive gauge...
+        # tricks to have a nice gauge
         if len(results) == 0:
             min_items_count = 0
             max_items_count = 100
@@ -741,12 +760,12 @@ def project_stats(project_id, spider_id):
             if (min_items_count / max_items_count) > 0.8 :
                 min_items_count = max_items_count * 0.8
             if (average_items_count / max_items_count) > 0.95 or max_items_count == last_items_count:
-                max_items_count = last_items_count * 1.05
+                max_items_count = average_items_count * 1.05
         
         return render_template("spider_stats.html", spider=spider, start_time=start_time, end_time=end_time, end_time_short=end_time_short, duration_time=duration_time,
                     last_start_time=last_start_time, last_items_count=last_items_count, average_items_count=average_items_count,
                     min_items_count=min_items_count, max_items_count=max_items_count, 
                     requests_count=requests_count, items_count=items_count, items_cached=items_cached,
                     warnings_count=warnings_count, errors_count=errors_count,
-                    bytes_count=bytes_count, retries_count=retries_count, exceptions_count=exceptions_count,
+                    bytes_count=bytes_count, retries_count=retries_count, exceptions_count=exceptions_count, exceptions_size=exceptions_size,
                     cache_size_count=cache_size_count, cache_object_count=cache_object_count)

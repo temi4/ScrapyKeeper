@@ -1,151 +1,284 @@
 {% extends "base.html" %}
 {% block content_header %}
-<h1>{{ title }} Stats</h1>
+<h1>Project {{ project.project_name }} Stats</h1>
 {% endblock %}
 {% block content_body %}
-<div class="box">
-    <div class="box-header">
-        <h3 class="box-title">Spider Running (last 24 hours)</h3>
-    </div>
-    <div class="box-body">
-        <div class="chart">
-            <canvas id="run-stats-chart" style="height:230px"></canvas>
+
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Working Time last 24h</h3>
+            </div>
+            <div class="box-body">
+                <div class="workingtime"></div>
+            </div>
         </div>
     </div>
-    <div class="box-footer">
-
-    </div>
-</div>
-<div class="box">
-    <div class="box-header">
-        <h3 class="box-title">Performed Requests (last 24 hours)</h3>
-    </div>
-    <div class="box-body">
-        <div class="chart">
-            <canvas id="request-stats-chart" style="height:230px"></canvas>
+    <div class="col-md-4">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Last Runs</h3>
+            </div>
+            <div class="box-body">
+                <div class="lastruns"></div>
+            </div>
         </div>
     </div>
-    <div class="box-footer">
-
-    </div>
-</div>
-<div class="box">
-    <div class="box-header">
-        <h3 class="box-title">Collected Items (last 24 hours)</h3>
-    </div>
-    <div class="box-body">
-        <div class="chart">
-            <canvas id="item-stats-chart" style="height:230px"></canvas>
+    <div class="col-md-4">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Quality Review %</h3>
+            </div>
+            <div class="box-body">
+                <div class="quality"></div>
+            </div>
         </div>
     </div>
-    <div class="box-footer">
-
+    <div class="clearfix"></div>
+    <div class="col-md-4">
+        <div class="box box-warning">
+            <div class="box-header with-border">
+                <h3 class="box-title">Last Errors and Exceptions</h3>
+            </div>
+            <div class="box-body table-responsive" style="height: 458px;">
+                <table class="table table-striped">
+                    <tr>
+                        <th style="width: 10px">#</th>
+                        <th style="width: 160px">Spider</th>
+                        <th style="width: 40px">Items</th>
+                        <th style="width: 40px">Errors</th>
+                        <th style="width: 40px">Exceptions</th>
+                    </tr>
+                    {% for job in last_ee %}
+                        <tr>
+                            <td><a href="/project/{{ job.project_id }}/jobexecs/{{ job.job_execution_id }}/log" target="_blank">{{ job.job_execution_id }}</a></td>
+                            <td>{{ job.job_instance.spider_name }}</td>
+                            <td>{{ job.items_count }}</td>
+                            <td>{{ job.errors_count }}</td>
+                            <td>{{ job.exceptions_count }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">History</h3>
+            </div>
+            <div class="box-body">
+                <div class="history"></div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
 {% block script %}
 <script src="/static/js/Chart.min.js"></script>
 <script>
-    //-------------
-    //- BAR CHART -
-    //-------------
-    var runStatsData = {
-        labels: [{% for item in run_stats %} '{{ item.key }}', {% endfor %}],
-        datasets: [
-            {
-                label: "Electronics",
-                fillColor: "rgba(210, 214, 222, 1)",
-                strokeColor: "rgba(210, 214, 222, 1)",
-                pointColor: "rgba(210, 214, 222, 1)",
-                pointStrokeColor: "#c1c7d1",
-                pointHighlightFill: "#fff",
-                pointHighlightStroke: "rgba(220,220,220,1)",
-                data: [{% for item in run_stats %} {{ item.value }}, {% endfor %}]
-            }
-        ]
-    };
-    var runStatsChartCanvas = $("#run-stats-chart").get(0).getContext("2d");
-    var runStatsChart = new Chart(runStatsChartCanvas);
-    var runStatsChartData = runStatsData;
-
-
-    //-------------
-    //- BAR CHART -
-    //-------------
-    var requestStatsData = {
-        labels: [{% for item in request_stats %} '{{ item.key }}', {% endfor %}],
-        datasets: [
-            {
-                label: "Electronics",
-                fillColor: "rgba(210, 214, 222, 1)",
-                strokeColor: "rgba(210, 214, 222, 1)",
-                pointColor: "rgba(210, 214, 222, 1)",
-                pointStrokeColor: "#c1c7d1",
-                pointHighlightFill: "#fff",
-                pointHighlightStroke: "rgba(220,220,220,1)",
-                data: [{% for item in request_stats %} {{ item.value }}, {% endfor %}]
-            }
-        ]
-    };
-    var requestStatsChartCanvas = $("#request-stats-chart").get(0).getContext("2d");
-    var requestStatsChart = new Chart(requestStatsChartCanvas);
-    var requestStatsChartData = requestStatsData;
-
-
-    //-------------
-    //- BAR CHART -
-    //-------------
-    var itemStatsData = {
-        labels: [{% for item in item_stats %} '{{ item.key }}', {% endfor %}],
-        datasets: [
-            {
-                label: "Electronics",
-                fillColor: "rgba(210, 214, 222, 1)",
-                strokeColor: "rgba(210, 214, 222, 1)",
-                pointColor: "rgba(210, 214, 222, 1)",
-                pointStrokeColor: "#c1c7d1",
-                pointHighlightFill: "#fff",
-                pointHighlightStroke: "rgba(220,220,220,1)",
-                data: [{% for item in item_stats %} {{ item.value }}, {% endfor %}]
-            }
-        ]
-    };
-    var itemStatsChartCanvas = $("#item-stats-chart").get(0).getContext("2d");
-    var itemStatsChart = new Chart(itemStatsChartCanvas);
-    var itemStatsChartData = itemStatsData;
-
-
-    var statsChartOptions = {
-        //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
-        scaleBeginAtZero: true,
-        //Boolean - Whether grid lines are shown across the chart
-        scaleShowGridLines: true,
-        //String - Colour of the grid lines
-        scaleGridLineColor: "rgba(0,0,0,.05)",
-        //Number - Width of the grid lines
-        scaleGridLineWidth: 1,
-        //Boolean - Whether to show horizontal lines (except X axis)
-        scaleShowHorizontalLines: true,
-        //Boolean - Whether to show vertical lines (except Y axis)
-        scaleShowVerticalLines: true,
-        //Boolean - If there is a stroke on each bar
-        barShowStroke: true,
-        //Number - Pixel width of the bar stroke
-        barStrokeWidth: 2,
-        //Number - Spacing between each of the X value sets
-        barValueSpacing: 5,
-        //Number - Spacing between data sets within X values
-        barDatasetSpacing: 1,
-        //Boolean - whether to make the chart responsive
-        responsive: true,
-        maintainAspectRatio: true
-    };
-
-    statsChartOptions.datasetFill = true;
     
-    // load chart option into each component
-    runStatsChart.Line(runStatsChartData, statsChartOptions);
-    requestStatsChart.Line(requestStatsChartData, statsChartOptions);
-    itemStatsChart.Line(itemStatsChartData, statsChartOptions);
+    
+    // - Assign a random color to each spider
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+    
+    {% for item in working_time.keys() %}
+    var color{{ item }} = getRandomColor();
+    {% endfor %}
+    var color = Chart.helpers.color;
+    
+    
+    //-------------
+    //- POLAR AREA CHART Working Time -
+    //-------------
+    var chartColors = window.chartColors;
+    var polarConfig = {
+        data: {
+            datasets: [{
+                data: [{% for item in working_time.values() %} '{{ item }}', {% endfor %}],
+                backgroundColor: [
+                    {% for item in working_time.keys() %}
+                    color(color{{ item }}).alpha(0.5).rgbString(),
+                    {% endfor %}
+                ],
+            }],
+            labels: [{% for item in working_time.keys() %} '{{ item }}', {% endfor %}]
+        },
+        options: {
+            responsive: true,
+            legend: {
+                position: 'right',
+            },
+            scale: {
+                ticks: {
+                    beginAtZero: true
+                },
+                reverse: false
+            },
+            animation: {
+                animateRotate: false,
+                animateScale: true
+            }
+        }
+    };
+
+
+    //-------------
+    //- BAR CHART Last Runs -
+    //-------------
+    var barChartData = {
+        labels: [{% for item in last_run %} '{{ item.start_time }}', {% endfor %}],
+        datasets: [{
+            backgroundColor: [{% for item in last_run %} color(color{{ item.job_instance.spider_name }}).alpha(0.5).rgbString(), {% endfor %}],
+            yAxisID: 'y-axis-1',
+            data: [{% for item in last_run %} '{{ item.items_count }}', {% endfor %}]
+        }]
+    };
+
+    //-------------
+    //- RADAR CHART Last Runs -
+    //-------------
+    var radarConfig = {
+        type: 'radar',
+        data: {
+            labels: ['Errors', 'Retries', 'Exceptions', 'Warning', 'Bytes', 'Cache Size'],
+            datasets: [
+                        {% for item in quality_review.keys() %}
+                            {
+                                label: '{{ item }}',
+                                backgroundColor: color(color{{ item }}).alpha(0.5).rgbString(),
+                                borderColor: color(color{{ item }}).rgbString(),
+                                pointBackgroundColor: color(color{{ item }}).rgbString(),
+                                data: [{{ quality_review[item][0] }}, {{ quality_review[item][1] }}, {{ quality_review[item][2] }}, {{ quality_review[item][3] }}, {{ quality_review[item][4] }}, {{ quality_review[item][5] }}]
+                            },
+                        {% endfor %}
+                    ]
+        },
+        options: {
+            legend: {
+                display: false,
+            }
+        }
+    };
+
+
+    window.onload = function() {
+        //-------------
+        //- POLAR AREA CHART Working Time -
+        //-------------
+        var workingtime = document.querySelector('.workingtime');
+        var div = document.createElement('div');
+        div.classList.add('chart-container');
+        var canvas = document.createElement('canvas');
+        div.appendChild(canvas);
+        workingtime.appendChild(div);
+        var ctx = canvas.getContext('2d');
+        window.myPolarArea = Chart.PolarArea(ctx, polarConfig);
+
+        //-------------
+        //- BAR CHART Last Runs -
+        //-------------
+        var lastruns = document.querySelector('.lastruns');
+        var div = document.createElement('div');
+        div.classList.add('chart-container');
+        var canvas = document.createElement('canvas');
+        div.appendChild(canvas);
+        lastruns.appendChild(div);
+        var ctx = canvas.getContext('2d');
+        window.myBar = new Chart(ctx, {
+            type: 'bar',
+            data: barChartData,
+            options: {
+                responsive: true,
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    mode: 'index',
+                    intersect: true
+                },
+                scales: {
+                    yAxes: [{
+                        type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+                        display: true,
+                        position: 'left',
+                        id: 'y-axis-1',
+                    }],
+                }
+            }
+        });
+
+        //-------------
+        //- RADAR CHART Last Runs -
+        //-------------
+        var quality = document.querySelector('.quality');
+        var div = document.createElement('div');
+        div.classList.add('chart-container');
+        var canvas = document.createElement('canvas');
+        div.appendChild(canvas);
+        quality.appendChild(div);
+        var ctx = canvas.getContext('2d');
+        window.myRadar = new Chart(ctx, radarConfig);
+
+        //-------------
+        //- FINANCIAL CHART History -
+        //-------------
+        var timeFormat = 'YYYY-MM-DD';
+        var history = document.querySelector('.history');
+        var div = document.createElement('div');
+        div.classList.add('chart-container');
+        var canvas = document.createElement('canvas');
+        canvas.width = 1000;
+        canvas.height = 420;
+        div.appendChild(canvas);
+        history.appendChild(div);
+        var ctx = canvas.getContext('2d');
+        var cfg = {
+            type: 'bar',
+            data: {
+                labels: [{% for item in run_stats %} '{{ item.key }}', {% endfor %}],
+                datasets: [{
+                    data: [{% for item in run_stats %} {{ item.value }}, {% endfor %}],
+                    type: 'bar',
+                    pointRadius: 0,
+                    fill: false,
+                    lineTension: 0,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                scales: {
+                    xAxes: [{
+                        distribution: 'series',
+                        ticks: {
+                            source: 'labels'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Scraped Items'
+                        }
+                    }]
+                }
+            }
+        };
+    var chart = new Chart(ctx, cfg);
+
+    };
+
+
 </script>
 {% endblock %}

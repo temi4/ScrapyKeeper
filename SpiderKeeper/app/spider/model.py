@@ -1,5 +1,6 @@
 import datetime
 import demjson
+import numpy as np
 import re
 from sqlalchemy import desc
 from SpiderKeeper.app import db, Base
@@ -250,6 +251,89 @@ class JobExecution(Base):
         return result
 
     @classmethod
+    def list_working_time(cls, project_id):
+        result = {}
+        last_time = datetime.datetime.now() - datetime.timedelta(hours=23)
+        last_time = datetime.datetime(last_time.year, last_time.month, last_time.day, last_time.hour)
+        for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
+                                                       JobExecution.date_created >= last_time).all():
+            if (job_execution.start_time != None) : # avoid unstarted jobs
+                if job_execution.end_time == None:  # treat unfinished jobs
+                    duration = (datetime.datetime.now() - job_execution.start_time).total_seconds()
+                else :                              # normal case
+                    duration = (job_execution.end_time - job_execution.start_time).total_seconds()
+                dico = job_execution.to_dict()
+                if dico['job_instance']['spider_name'] in result.keys():
+                    result[dico['job_instance']['spider_name']] += duration
+                else :
+                    result[dico['job_instance']['spider_name']] = duration
+        result_sorted = {}
+        for key in sorted(result.keys()): result_sorted[key] = result[key]
+        return result_sorted
+
+    @classmethod
+    def list_last_run(cls, project_id):
+        result = []
+        for job_execution in JobExecution.query.filter_by(project_id=project_id).order_by(desc(JobExecution.id)).limit(15).all():
+            result.append(job_execution.to_dict())
+        result.reverse()
+        return result
+
+    @classmethod
+    def list_quality_review(cls, project_id):
+        result = {}
+        iteration = {}
+        for job_execution in JobExecution.query.filter_by(project_id=project_id).order_by(desc(JobExecution.id)).limit(100).all():
+            
+            dico = job_execution.to_dict()
+            # Errors, Retry, Exceptions, Bytes, Cache Size
+            stream = np.array([ dico['errors_count'], dico['retries_count'], dico['exceptions_count'],
+                                dico['warnings_count'], dico['bytes_count'], dico['cache_size_count'] ])
+            
+            if dico['job_instance']['spider_name'] in result.keys():
+                if iteration[dico['job_instance']['spider_name']] < 10 :
+                    iteration[dico['job_instance']['spider_name']] += 1
+                    result[dico['job_instance']['spider_name']] += stream
+            else :
+                iteration[dico['job_instance']['spider_name']] = 1
+                result[dico['job_instance']['spider_name']] = stream
+        total = np.array([.01, .01, .01, .01, .01, .01])
+        # average ratio
+        for i in result.keys():
+            result[i] = np.array(result[i]) / np.array([1, 1, 1, 1, iteration[i], iteration[i]])
+            total += np.array(result[i])
+        # compare ratio
+        for i in result.keys():
+            result[i] = np.array(result[i]) / total
+        return result
+
+    @classmethod
+    def list_last_ee(cls, project_id):
+        result = []
+        for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id).filter(
+                                    (JobExecution.errors_count >= 1) | (JobExecution.exceptions_count >= 1) | (JobExecution.items_count == 0)
+                                    ).order_by(desc(JobExecution.id)).limit(10).all():
+            result.append(job_execution.to_dict())
+        return result
+
+    @classmethod
+    def list_run_stats_by_hours(cls, project_id):
+        result = {}
+        hour_keys = []
+        last_time = datetime.datetime.now() - datetime.timedelta(hours=23)
+        last_time = datetime.datetime(last_time.year, last_time.month, last_time.day, last_time.hour)
+        for hour in range(23, -1, -1):
+            time_tmp = datetime.datetime.now() - datetime.timedelta(hours=hour)
+            hour_key = time_tmp.strftime('%Y-%m-%d %H:00:00')
+            hour_keys.append(hour_key)
+            result[hour_key] = 0  # init
+        for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
+                                                       JobExecution.date_created >= last_time).all():
+            hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
+            result[hour_key] += job_execution.items_count
+        return [dict(key=hour_key, value=result[hour_key]) for hour_key in hour_keys]
+
+    @classmethod
     def list_spider_stats(cls, project_id, spider_id):
         result = []
         for spider in SpiderInstance.query.filter_by(project_id=project_id, id=spider_id).all():
@@ -261,30 +345,6 @@ class JobExecution(Base):
             result.append(job_execution.to_dict())
         result.reverse()
         return result
-
-    @classmethod
-    def list_run_stats_by_hours(cls, project_id, spider_id):
-        result = {}
-        hour_keys = []
-        last_time = datetime.datetime.now() - datetime.timedelta(hours=23)
-        last_time = datetime.datetime(last_time.year, last_time.month, last_time.day, last_time.hour)
-        for hour in range(23, -1, -1):
-            time_tmp = datetime.datetime.now() - datetime.timedelta(hours=hour)
-            hour_key = time_tmp.strftime('%Y-%m-%d %H:00:00')
-            hour_keys.append(hour_key)
-            result[hour_key] = 0  # init
-        if spider_id == "project" :
-            for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
-                                                       JobExecution.date_created >= last_time).all():
-                hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
-                result[hour_key] += 1
-        else :
-            for job_execution in JobExecution.query.filter(JobExecution.project_id == project_id,
-                                                       JobExecution.job_instance_id == spider_id,
-                                                       JobExecution.date_created >= last_time).all():
-                hour_key = job_execution.create_time.strftime('%Y-%m-%d %H:00:00')
-                result[hour_key] += 1
-        return [dict(key=hour_key, value=result[hour_key]) for hour_key in hour_keys]
 
     @classmethod
     def list_request_stats_by_hours(cls, project_id, spider_id):
