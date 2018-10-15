@@ -263,10 +263,11 @@ class JobExecution(Base):
                 else :                              # normal case
                     duration = (job_execution.end_time - job_execution.start_time).total_seconds()
                 dico = job_execution.to_dict()
-                if dico['job_instance']['spider_name'] in result.keys():
-                    result[dico['job_instance']['spider_name']] += duration
-                else :
-                    result[dico['job_instance']['spider_name']] = duration
+                if dico['job_instance'] != {}:
+                    if dico['job_instance']['spider_name'] in result.keys():
+                        result[dico['job_instance']['spider_name']] += duration
+                    else :
+                        result[dico['job_instance']['spider_name']] = duration
         result_sorted = {}
         for key in sorted(result.keys()): result_sorted[key] = result[key]
         return result_sorted
@@ -289,14 +290,14 @@ class JobExecution(Base):
             # Errors, Retry, Exceptions, Bytes, Cache Size
             stream = np.array([ dico['errors_count'], dico['retries_count'], dico['exceptions_count'],
                                 dico['warnings_count'], dico['bytes_count'], dico['cache_size_count'] ])
-            
-            if dico['job_instance']['spider_name'] in result.keys():
-                if iteration[dico['job_instance']['spider_name']] < 10 :
-                    iteration[dico['job_instance']['spider_name']] += 1
-                    result[dico['job_instance']['spider_name']] += stream
-            else :
-                iteration[dico['job_instance']['spider_name']] = 1
-                result[dico['job_instance']['spider_name']] = stream
+            if dico['job_instance'] != {}:
+                if dico['job_instance']['spider_name'] in result.keys():
+                    if iteration[dico['job_instance']['spider_name']] < 10 :
+                        iteration[dico['job_instance']['spider_name']] += 1
+                        result[dico['job_instance']['spider_name']] += stream
+                else :
+                    iteration[dico['job_instance']['spider_name']] = 1
+                    result[dico['job_instance']['spider_name']] = stream
         total = np.array([.01, .01, .01, .01, .01, .01])
         # average ratio
         for i in result.keys():
@@ -341,7 +342,7 @@ class JobExecution(Base):
         job_instances = []
         for job_instance in JobInstance.query.filter_by(spider_name=spider_name).order_by(desc(JobInstance.id)).limit(10).all():
             job_instances.append(job_instance.id)
-        for job_execution in JobExecution.query.filter(JobExecution.id.in_(job_instances)).order_by(desc(JobExecution.id)).all() :
+        for job_execution in JobExecution.query.filter(JobExecution.job_instance_id.in_(job_instances)).order_by(desc(JobExecution.id)).all() :
             result.append(job_execution.to_dict())
         result.reverse()
         return result

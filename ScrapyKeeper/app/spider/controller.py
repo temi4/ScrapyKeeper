@@ -674,6 +674,7 @@ def project_stats(project_id, spider_id):
         project = Project.find_project_by_id(project_id)
         spider = SpiderInstance.query.filter_by(project_id=project_id, id=spider_id).first()
         results = JobExecution.list_spider_stats(project_id, spider_id)
+        
         start_time = []
         end_time = []
         end_time_short = []
