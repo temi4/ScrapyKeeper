@@ -11,7 +11,7 @@ ScrapyKeeeper is a fork of [SpiderKeeper](https://github.com/DormyMo/SpiderKeepe
 Forked to provide:
   - Enhanced statistics (Errors, Exceptions, Retries...)
   - Cache support
-  - Dashboard
+  - Dashboarding
   - Most of pending SpideKeeper ahead commits
 
 ## Screenshot

@@ -4,6 +4,18 @@
     }
 }
 
+.nav-right{
+    float: right;
+}
+.dropdown-toggle-right{
+    border-left-width: 1px;
+    border-left-style: solid;
+    border-left-color: rgb(238, 238, 238);
+}
+.dropdown-menu-right{
+    left: -120px;
+}
+
 .txt-args {
     font-size: 10px;
     white-space: nowrap;
