@@ -751,7 +751,7 @@ def project_stats(project_id, spider_id):
             displayDates = True
         
         # remove last JobInstance if not started or not finished
-        if (results[-1]['start_time'] == None) or (results[-1]['end_time'] == None) :
+        if (len(results) > 0) and ((results[-1]['start_time'] == None) or (results[-1]['end_time'] == None)) :
             results.pop()
         
         for i in range(0,len(results)):
