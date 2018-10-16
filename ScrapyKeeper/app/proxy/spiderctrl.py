@@ -150,7 +150,7 @@ class SpiderAgent():
         leaders = []
         if 'daemon' in arguments:
             for candidate in candidates:
-                if candidate.server == arguments['daemon']:
+                if candidate.server == arguments['daemon'][0]:
                     leaders = [candidate]
         else:
             # TODO optimize some better func to vote the leader
