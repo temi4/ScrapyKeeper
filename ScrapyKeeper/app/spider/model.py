@@ -107,6 +107,8 @@ class JobInstance(Base):
 
     spider_name = db.Column(db.String(100), nullable=False, index=True)
     project_id = db.Column(db.INTEGER, nullable=False, index=True)
+    start_tasks = db.Column(db.INTEGER, default=1)
+    max_start_tasks = db.Column(db.INTEGER, default=1)
     tags = db.Column(db.Text)  # job tag(split by , )
     spider_arguments = db.Column(db.Text)  # job execute arguments(split by , ex.: arg1=foo,arg2=bar)
     priority = db.Column(db.INTEGER)
@@ -125,6 +127,8 @@ class JobInstance(Base):
             spider_name=self.spider_name,
             tags=self.tags.split(',') if self.tags else None,
             spider_arguments=self.spider_arguments,
+            start_tasks=self.start_tasks,
+            max_start_tasks=self.max_start_tasks,
             priority=self.priority,
             desc=self.desc,
             cron_minutes=self.cron_minutes,

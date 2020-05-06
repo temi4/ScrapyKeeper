@@ -2,7 +2,7 @@ import threading
 import time
 
 from ScrapyKeeper.app import scheduler, app, agent, db
-from ScrapyKeeper.app.spider.model import Project, JobInstance, SpiderInstance
+from ScrapyKeeper.app.spider.model import Project, JobInstance, SpiderInstance, SpiderStatus, JobExecution
 
 
 def sync_job_execution_status_job():
@@ -34,9 +34,27 @@ def run_spider_job(job_instance_id):
     '''
     try:
         job_instance = JobInstance.find_job_instance_by_id(job_instance_id)
-        agent.start_spider(job_instance)
-        app.logger.info('[run_spider_job][project:%s][spider_name:%s][job_instance_id:%s]' % (
-            job_instance.project_id, job_instance.spider_name, job_instance.id))
+        start_tasks = job_instance.start_tasks
+        count = JobExecution.query.filter_by(job_instance_id=job_instance_id).filter(
+            JobExecution.running_status.in_([SpiderStatus.PENDING, SpiderStatus.RUNNING])
+        ).count()
+        if count >= job_instance.max_start_tasks:
+            return
+
+        slots = job_instance.max_start_tasks - count
+        if job_instance.start_tasks > slots:
+            start_tasks = slots
+
+        if start_tasks > 0:
+            i = 0
+            while i < start_tasks:
+                agent.start_spider(job_instance)
+                i += 1
+                app.logger.info(
+                    '[run_spider_job][project:%s][spider_name:%s][job_instance_id:%s]'
+                    '[start_tasks:%s][i:%s]' % (
+                    job_instance.project_id, job_instance.spider_name, job_instance.id, start_tasks, i))
+
     except Exception as e:
         app.logger.error('[run_spider_job] ' + str(e))
 
@@ -47,10 +65,11 @@ def reload_runnable_spider_job_execution():
     :return:
     '''
     running_job_ids = set([job.id for job in scheduler.get_jobs()])
-    # app.logger.debug('[running_job_ids] %s' % ','.join(running_job_ids))
+    app.logger.debug('[running_job_ids] %s' % ','.join(running_job_ids))
     available_job_ids = set()
     # add new job to schedule
     for job_instance in JobInstance.query.filter_by(enabled=0, run_type="periodic").all():
+        app.logger.debug('[start job_instance] %s' % job_instance.id)
         job_id = "spider_job_%s:%s" % (job_instance.id, int(time.mktime(job_instance.date_modified.timetuple())))
         available_job_ids.add(job_id)
         if job_id not in running_job_ids:

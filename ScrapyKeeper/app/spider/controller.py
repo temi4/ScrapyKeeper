@@ -122,6 +122,18 @@ class SpiderDetailCtrl(flask_restful.Resource):
             "required": False,
             "paramType": "form",
             "dataType": 'string'
+        }, {
+            "name": "start_tasks",
+            "description": "spider count start tasks",
+            "required": False,
+            "paramType": "form",
+            "dataType": 'int'
+        }, {
+            "name": "max_start_tasks",
+            "description": "spider max start tasks",
+            "required": False,
+            "paramType": "form",
+            "dataType": 'int'
         }])
     def put(self, project_id, spider_id):
         spider_instance = SpiderInstance.query.filter_by(project_id=project_id, id=spider_id).first()
@@ -133,6 +145,8 @@ class SpiderDetailCtrl(flask_restful.Resource):
         job_instance.desc = request.form.get('desc')
         job_instance.tags = request.form.get('tags')
         job_instance.run_type = JobRunType.ONETIME
+        job_instance.start_tasks = request.form.get('spider_start_tasks', 1)
+        job_instance.max_start_tasks = request.form.get('spider_max_start_tasks', 1)
         job_instance.priority = request.form.get('priority', 0)
         job_instance.enabled = -1
         db.session.add(job_instance)
@@ -236,6 +250,18 @@ class JobCtrl(flask_restful.Resource):
             "required": False,
             "paramType": "form",
             "dataType": 'string'
+        }, {
+            "name": "start_tasks",
+            "description": "spider count start tasks",
+            "required": False,
+            "paramType": "form",
+            "dataType": 'int'
+        }, {
+            "name": "max_start_tasks",
+            "description": "spider max start tasks",
+            "required": False,
+            "paramType": "form",
+            "dataType": 'int'
         }])
     def post(self, project_id):
         post_data = request.form
@@ -254,6 +280,10 @@ class JobCtrl(flask_restful.Resource):
                 job_instance.cron_day_of_month = post_data.get('cron_day_of_month') or '*'
                 job_instance.cron_day_of_week = post_data.get('cron_day_of_week') or '*'
                 job_instance.cron_month = post_data.get('cron_month') or '*'
+                job_instance.cron_month = post_data.get('cron_month') or '*'
+                job_instance.cron_month = post_data.get('cron_month') or '*'
+                job_instance.start_tasks = post_data.get('start_tasks', 1)
+                job_instance.max_start_tasks = post_data.get('max_start_tasks', 1)
             db.session.add(job_instance)
             db.session.commit()
             return True
@@ -369,6 +399,9 @@ class JobDetailCtrl(flask_restful.Resource):
             job_instance.cron_day_of_month = post_data.get('cron_day_of_month') or job_instance.cron_day_of_month
             job_instance.cron_day_of_week = post_data.get('cron_day_of_week') or job_instance.cron_day_of_week
             job_instance.cron_month = post_data.get('cron_month') or job_instance.cron_month
+            job_instance.start_tasks = post_data.get('start_tasks', 1) or job_instance.start_tasks
+            job_instance.max_start_tasks = post_data.get('max_start_tasks', 1) or job_instance.max_start_tasks
+
             job_instance.desc = post_data.get('desc', 0) or job_instance.desc
             job_instance.tags = post_data.get('tags', 0) or job_instance.tags
             db.session.commit()
@@ -570,6 +603,8 @@ def job_add(project_id):
         job_instance.cron_day_of_month = request.form.get('cron_day_of_month') or '*'
         job_instance.cron_day_of_week = request.form.get('cron_day_of_week') or '*'
         job_instance.cron_month = request.form.get('cron_month') or '*'
+        job_instance.start_tasks = request.form.get('start_tasks')
+        job_instance.max_start_tasks = request.form.get('max_start_tasks')
         # set cron exp manually
         if request.form.get('cron_exp'):
             job_instance.cron_minutes, job_instance.cron_hour, job_instance.cron_day_of_month, job_instance.cron_month, job_instance.cron_day_of_week = \
@@ -608,6 +643,8 @@ def job_addlist(project_id):
             job_instance.cron_day_of_month = request.form.get('cron_day_of_month') or '*'
             job_instance.cron_day_of_week = request.form.get('cron_day_of_week') or '*'
             job_instance.cron_month = request.form.get('cron_month') or '*'
+            job_instance.start_tasks = request.form.get('start_tasks')
+            job_instance.max_start_tasks = request.form.get('max_start_tasks')
             # set cron exp manually
             if request.form.get('cron_exp'):
                 job_instance.cron_minutes, job_instance.cron_hour, job_instance.cron_day_of_month, job_instance.cron_month, job_instance.cron_day_of_week = \
