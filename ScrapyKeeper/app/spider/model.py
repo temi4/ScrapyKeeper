@@ -166,6 +166,7 @@ class JobExecution(Base):
     running_status = db.Column(db.INTEGER, default=SpiderStatus.PENDING)
     running_on = db.Column(db.Text)
 
+    query_info = db.Column(db.Text)
     raw_stats = db.Column(db.Text)
     requests_count = db.Column(db.Integer, default=0)
     items_count = db.Column(db.Integer, default=0)
@@ -177,6 +178,8 @@ class JobExecution(Base):
     cache_size_count = db.Column(db.Integer, default=0)
     cache_object_count = db.Column(db.Integer, default=0)
     RAW_STATS_REGEX = '\[scrapy\.statscollectors\][^{]+({[^}]+})'
+    RAW_QUERY_INFO = '\[yandex_organization\] INFO: YandexOrganizationSpider \| Начали парсинг(.*?)'
+
     def process_raw_stats(self):
         if self.raw_stats is None:
             return
