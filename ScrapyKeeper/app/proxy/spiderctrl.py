@@ -123,6 +123,7 @@ class SpiderAgent():
 
                     query_raw = res.text[0:8192]
                     match = re.findall(job_execution.RAW_QUERY_INFO, query_raw, re.DOTALL)
+                    print(match)
                     if match:
                         job_execution.query_info = match[0].strip()
 

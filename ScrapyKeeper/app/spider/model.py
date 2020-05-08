@@ -212,6 +212,7 @@ class JobExecution(Base):
             'end_time': self.end_time.strftime('%Y-%m-%d %H:%M:%S') if self.end_time else None,
             'running_status': self.running_status,
             'running_on': self.running_on,
+            'query_info': self.query_info,
             'job_instance': job_instance.to_dict() if job_instance else {},
             'has_warnings': self.has_warnings(),
             'has_errors': self.has_errors(),
