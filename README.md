@@ -1,18 +1,18 @@
 # ScrapyKeeper
 
-[![Latest Version](http://img.shields.io/pypi/v/SpiderKeeper.svg)](https://pypi.python.org/pypi/SpiderKeeper)
-[![Python Versions](http://img.shields.io/pypi/pyversions/SpiderKeeper.svg)](https://pypi.python.org/pypi/SpiderKeeper)
-[![The MIT License](http://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/DormyMo/SpiderKeeper/blob/master/LICENSE)
-   
 A scalable admin ui for scrapy spider service 
 
-ScrapyKeeeper is a fork of [SpiderKeeper](https://github.com/DormyMo/SpiderKeeper)
+It's fork of [ScrapyKeeper](https://github.com/fliot/ScrapyKeeper) and [SpiderKeeper](https://github.com/DormyMo/SpiderKeeper)
 
-Forked to provide:
-  - Enhanced statistics (Errors, Exceptions, Retries...)
-  - Cache support
-  - Dashboarding
-  - Most of pending SpideKeeper ahead commits
+Contains all of the previous versions and a number of updates:
+  - requirements updated to latest versions
+  - in the periodic task added items:
+    - Max start tasks - The number of maximum tasks that can hang on the launch and be in work
+    - Number of start-ups - The number of simultaneously launched copies of scrapy
+  - You can add an entry to the log QUERY <<$MY TEXT$>> and show up in completed tasks
+    - $MY TEXT$ - need change
+    - It’s convenient when you start the parser several times with different input parameters and want to see what happens
+  - fix any bugs 
 
 ## Screenshot
 ![job dashboard](https://raw.githubusercontent.com/fliot/ScrapyKeeper/master/screenshot/screenshot_1.png)
