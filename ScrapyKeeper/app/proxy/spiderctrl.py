@@ -120,6 +120,7 @@ class SpiderAgent():
                     
                     res = requests.get(self.log_url(job_execution))
                     res.encoding = 'utf8'
+
                     query_raw = res.text[0:8192]
                     match = re.findall(job_execution.RAW_QUERY_INFO, query_raw, re.DOTALL)
                     if match:

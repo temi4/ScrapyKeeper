@@ -167,7 +167,7 @@
                 <td><a href="/project/{{ project.id }}/job/periodic#{{ job.job_instance_id }}">{{ job.job_instance_id }}</a></td>
                 <td>{{ job.job_instance.spider_name }}</td>
                 <td class="txt-args" data-toggle="tooltip" data-placement="right"
-                    title="{{ job.job_instance.query_info }}">{{ job.job_instance.query_info }}
+                    title="{{ job.query_info }}">{{ job.query_info }}
                 </td>
                 {% if job.job_instance.priority == -1 %}
                 <td>
