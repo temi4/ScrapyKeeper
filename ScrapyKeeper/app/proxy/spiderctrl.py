@@ -103,6 +103,13 @@ class SpiderAgent():
             job_execution_list = JobExecution.list_uncomplete_job()
             job_execution_dict = dict(
                 [(job_execution.service_job_execution_id, job_execution) for job_execution in job_execution_list])
+
+            last_hour = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+            for job_execution in job_execution_list:
+                if job_execution.running_status == SpiderStatus.PENDING \
+                        and job_execution.create_time > last_hour:
+                    job_execution.running_status = SpiderStatus.CANCELED
+
             # running
             for job_execution_info in job_status[SpiderStatus.RUNNING]:
                 job_execution = job_execution_dict.get(job_execution_info['id'])
@@ -123,7 +130,6 @@ class SpiderAgent():
 
                     query_raw = res.text[0:8192]
                     match = re.findall(job_execution.RAW_QUERY_INFO, query_raw, re.DOTALL)
-                    print(match)
                     if match:
                         job_execution.query_info = match[0].strip()
 
