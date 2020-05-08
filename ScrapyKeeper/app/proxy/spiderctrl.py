@@ -104,10 +104,10 @@ class SpiderAgent():
             job_execution_dict = dict(
                 [(job_execution.service_job_execution_id, job_execution) for job_execution in job_execution_list])
 
-            last_hour = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+            last_hours = datetime.datetime.utcnow() - datetime.timedelta(hours=2)
             for job_execution in job_execution_list:
                 if job_execution.running_status == SpiderStatus.PENDING \
-                        and job_execution.create_time > last_hour:
+                        and job_execution.create_time < last_hours:
                     job_execution.running_status = SpiderStatus.CANCELED
 
             # running
