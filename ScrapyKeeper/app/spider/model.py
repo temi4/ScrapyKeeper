@@ -178,7 +178,7 @@ class JobExecution(Base):
     cache_size_count = db.Column(db.Integer, default=0)
     cache_object_count = db.Column(db.Integer, default=0)
     RAW_STATS_REGEX = '\[scrapy\.statscollectors\][^{]+({[^}]+})'
-    RAW_QUERY_INFO = '\[yandex_organization\] INFO: YandexOrganizationSpider \| Начали парсинг(.*?)'
+    RAW_QUERY_INFO = 'QUERY <<(.*?)>>'
 
     def process_raw_stats(self):
         if self.raw_stats is None:
