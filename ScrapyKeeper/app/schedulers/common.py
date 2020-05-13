@@ -37,7 +37,7 @@ def run_spider_job(job_instance_id):
         job_instance = JobInstance.find_job_instance_by_id(job_instance_id)
         start_tasks = job_instance.start_tasks
 
-        start_time = datetime.utcnow() - timedelta(minutes=30)
+        start_time = datetime.now() - timedelta(minutes=30)
         count = JobExecution.query.filter_by(
             job_instance_id=job_instance_id,
             running_status=SpiderStatus.RUNNING,
