@@ -1,4 +1,5 @@
 import threading
+from datetime import datetime, timedelta
 import time
 
 from ScrapyKeeper.app import scheduler, app, agent, db
@@ -35,6 +36,15 @@ def run_spider_job(job_instance_id):
     try:
         job_instance = JobInstance.find_job_instance_by_id(job_instance_id)
         start_tasks = job_instance.start_tasks
+
+        start_time = datetime.utcnow() - timedelta(minutes=30)
+        count = JobExecution.query.filter_by(
+            job_instance_id=job_instance_id,
+            running_status=SpiderStatus.RUNNING,
+        ).filter(JobExecution.start_time < start_time).count()
+        if count > 0:
+            return
+
         count = JobExecution.query.filter_by(job_instance_id=job_instance_id).filter(
             JobExecution.running_status.in_([SpiderStatus.PENDING, SpiderStatus.RUNNING])
         ).count()
