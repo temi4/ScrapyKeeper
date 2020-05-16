@@ -37,13 +37,13 @@ def run_spider_job(job_instance_id):
         job_instance = JobInstance.find_job_instance_by_id(job_instance_id)
         start_tasks = job_instance.start_tasks
 
-        start_time = datetime.now() - timedelta(minutes=30)
+        """start_time = datetime.now() - timedelta(minutes=30)
         count = JobExecution.query.filter_by(
             job_instance_id=job_instance_id,
             running_status=SpiderStatus.RUNNING,
         ).filter(JobExecution.start_time < start_time).count()
         if count > 0:
-            return
+            return"""
 
         count = JobExecution.query.filter_by(job_instance_id=job_instance_id).filter(
             JobExecution.running_status.in_([SpiderStatus.PENDING, SpiderStatus.RUNNING])
