@@ -32,7 +32,8 @@
                 <th style="width: 160px">Spider</th>
                 <th style="width: 100px">Args</th>
                 <th style="width: 40px">Priority</th>
-                <th style="width: 160px">Wait</th>
+                <th style="width: 60px">Wait</th>
+                <th style="width: 60px">Stop</th>
             </tr>
             {% for job in job_status.PENDING %}
             {% if job.job_instance %}
@@ -61,6 +62,10 @@
                 </td>
                 {% endif %}
                 <td>{{ timedelta(now,job.create_time) }}</td>
+                <td>
+                    <a href="/project/{{ project.id }}/jobexecs/{{ job.job_execution_id }}/stop"><span
+                            class="label label-danger">Stop</span></a>
+                </td>
             </tr>
             {% endif %}
             {% endfor %}
